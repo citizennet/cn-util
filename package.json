@@ -1,0 +1,25 @@
+{
+  "name": "cn-util",
+  "version": "1.0.0",
+  "description": "helper JS functions for CitizenNet front-end",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/citizennet/cn-util.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/citizennet/cn-util/issues"
+  },
+  "homepage": "https://github.com/citizennet/cn-util#readme",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-jshint": "^1.12.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^1.5.1"
+  }
+}
