@@ -1,2 +1,2 @@
 # cn-util
-Helper JS function for CN front-end
+Helper JS functions for CitizenNet front-end
