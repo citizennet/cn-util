@@ -1,15 +1,7 @@
-describe('CN Util Test', function() {
-  var cnUtil;
-
-  beforeEach(function() {
-    module('cn.util');
-  });
-
-  beforeEach(inject(function($injector) {
-    cnUtil = $injector.get('cnUtil');
-  }));
-
-  describe('getModified', function() {
+ngDescribe({
+  name: 'getModified',
+  modules: 'cn.util',
+  tests: function(cnUtil) {
     it('should return nothing for identical objects', function() {
       expect(cnUtil.getModified(1, 1)).toBeUndefined();
       expect(cnUtil.getModified([1, 2], [1, 2])).toBeUndefined();
@@ -69,9 +61,22 @@ describe('CN Util Test', function() {
           'delete'
       )).toBeUndefined();
     });
-  });
-
-  describe('inheritCommon', function() {
+  }
+})({
+  name: 'diff',
+  modules: 'cn.util',
+  tests: function(cnUtil) {
+    it('should use `null` remove strategy on root level, and `delete` after', function() {
+      expect(cnUtil.diff(
+          {foo: 1, bar: 2, baz: {doo: 3, far: 4, faz: {foo: 1, bar: 2}}},
+          {foo: 1, baz: {doo: 2, far: null, faz: {foo: 2, bar: null}}
+      })).toEqual({bar: null, baz: {doo: 2, faz: {foo: 2}}});
+    });
+  }
+})({
+  name: 'inheritCommon',
+  modules: 'cn.util',
+  tests: function(cnUtil) {
     it('should return no inherited values', function() {
       expect(cnUtil.inheritCommon({foo: 1}, {bar: 1})).toEqual({bar: 1});
     });
@@ -83,9 +88,11 @@ describe('CN Util Test', function() {
       expect(cnUtil.inheritCommon({foo: {foo: 1}}, {foo: {foo: 2}})).toEqual({foo: {foo: 1}});
       expect(cnUtil.inheritCommon({foo: {foo: 1}}, {foo: undefined})).toEqual({foo: {foo: 1}});
     });
-  });
-
-  describe('constructErrorMessageAsHtml', function(){
+  }
+})({
+  name: 'constructErrorMessageAsHtml',
+  modules: 'cn.util',
+  tests: function(cnUtil) {
     var deliveryStatus = {
       errors:[
         {description: 'An error'}
@@ -98,16 +105,15 @@ describe('CN Util Test', function() {
     it('should have an html p tag at the end', function(){
       expect(/<\/p>$/.test(cnUtil.constructErrorMessageAsHtml(deliveryStatus.errors))).toBe(true);
     });
-  });
-
-  describe('constructPopoverHtml', function(){
-    var objectArray;
-    beforeEach(function(){
-      objectArray = [
-        {name: 'test 1', id: 1},
-        {name: 'test 2', id: 2}
-      ];
-    })
+  }
+})({
+  name: 'constructPopoverHtml',
+  modules: 'cn.util',
+  tests: function(cnUtil) {
+    var objectArray = [
+      {name: 'test 1', id: 1},
+      {name: 'test 2', id: 2}
+    ];
 
     it('should return the array with a popoverHtml key on each object in the array', function(){
       objectArray = cnUtil.constructPopoverHtml(objectArray, 'name', 'id');
@@ -121,7 +127,5 @@ describe('CN Util Test', function() {
     it('should have an html p tag at the end', function(){
       expect(/<\/p>$/.test(cnUtil.constructPopoverHtml(objectArray, 'name', 'id')[0].popoverHtml)).toBe(true);
     });
-  });
-
-
+  }
 });

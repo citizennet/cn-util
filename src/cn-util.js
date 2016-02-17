@@ -6,52 +6,49 @@
   angular.module('cn.util', [])
       .factory('cnUtil', function() {
         return {
-          diff: diff,
-          getModified: getModified,
-          inheritCommon: inheritCommon,
-          extend: extend,
-          constructErrorMessageAsHtml: constructErrorMessageAsHtml,
-          constructPopoverHtml: constructPopoverHtml
+          diff,
+          getModified,
+          inheritCommon,
+          extend,
+          constructErrorMessageAsHtml,
+          constructPopoverHtml
         };
 
         /////////
 
-        function diff(original, current, deep, removeAction) {
-          //console.log('diff:', deep);
-          return getModified(original, current, removeAction, !deep);
+        function diff(original, current, shallow, removeStrategy) {
+          console.log('shallow:', shallow);
+          return getModified(original, current, removeStrategy || 'model', shallow);
         }
 
-        function getModified(original, copy, removeAction, shallow) {
-          //console.log('getModified:', shallow);
-          var removeActions = {
-            delete: function(obj, key) {
-              delete obj[key];
-            },
-            null: function(obj, key) {
-              obj[key] = null;
-            }
-          }[removeAction || 'null'];
+        function getModified(original, copy, removeStrategy, shallow) {
+          //console.log('getModified:', removeStrategy, shallow);
+          var removeStretegies = {
+            'delete': (obj, key) => {delete obj[key]},
+            'null': (obj, key) => {obj[key] = null}
+          };
+          var removeHandler = removeStretegies[removeStrategy] || removeStretegies[null];
+          if(removeStrategy === 'model') removeStrategy = 'delete';
 
           if(angular.equals(original, copy)) {
             return;
           } else if(_.isArray(copy) || !_.isObject(copy)) {
             return copy;
-          } else {
-            var modified = {};
-            _.each(copy, function(val, key) {
-              if(shallow) {
-                if(!angular.equals(val, original[key])) modified[key] = val;
-              }
-              else {
-                var tmp = original[key] ? getModified(original[key], val, removeAction) : val;
-                if(tmp !== undefined && !angular.equals(original[key], tmp)) modified[key] = tmp;
-              }
-            });
-            _.each(original, function(val, key) {
-              if(val && (copy[key] === null || copy[key] === undefined)) removeActions(modified, key);
-            });
-            if(!_.isEmpty(modified)) return modified;
           }
+          var modified = {};
+          _.each(copy, function(val, key) {
+            if(shallow) {
+              if(!angular.equals(val, original[key])) modified[key] = val;
+            }
+            else {
+              var tmp = original[key] ? getModified(original[key], val, removeStrategy) : val;
+              if(tmp !== undefined && !angular.equals(original[key], tmp)) modified[key] = tmp;
+            }
+          });
+          _.each(original, function(val, key) {
+            if(val && (copy[key] === null || copy[key] === undefined)) removeHandler(modified, key);
+          });
+          if(!_.isEmpty(modified)) return modified;
         }
 
         function inheritCommon(from, to) {
