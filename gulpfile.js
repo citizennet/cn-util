@@ -42,7 +42,7 @@ gulp.task('test', function() {
 
 // Concatenate & Transpile JS
 gulp.task('scripts', function() {
-  return gulp.src('src/*.js')
+  return gulp.src(['src/*.js', '!src/*.test.js'])
       .pipe(sourcemaps.init())
       .pipe(babel())
       .pipe(concat('all.js'))
