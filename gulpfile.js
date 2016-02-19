@@ -58,5 +58,8 @@ gulp.task('watch', function() {
   gulp.watch('src/*.js', ['lint', 'scripts']);
 });
 
+// Default Task sans watch
+gulp.task('build', ['lint', 'scripts', 'test']);
+
 // Default Task
-gulp.task('default', ['lint', 'scripts', 'test', 'watch']);
+gulp.task('default', ['build', 'watch']);

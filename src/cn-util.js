@@ -6,6 +6,8 @@
   angular.module('cn.util', [])
       .factory('cnUtil', function() {
         return {
+          cleanModel,
+          cleanModelVal,
           diff,
           getModified,
           inheritCommon,
@@ -15,6 +17,26 @@
         };
 
         /////////
+
+        function cleanModel(model) {
+          _.each(model, cleanModelVal);
+          return model;
+        }
+
+        function cleanModelVal(modelVal) {
+          // if array,
+          if(_.isArray(modelVal)) {
+            modelVal.forEach(cleanModelVal);
+          }
+          else if(_.isObject(modelVal)) {
+            _.each(modelVal, (val, key) => {
+              if(val === null || val === undefined) delete modelVal[key];
+              else if(_.isArray(val)) val.forEach(cleanModelVal);
+              else if(_.isObject(val)) cleanModelVal(val);
+            });
+          }
+          return modelVal;
+        }
 
         function diff(original, current, shallow, removeStrategy) {
           console.log('shallow:', shallow);
