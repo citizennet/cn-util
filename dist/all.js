@@ -154,9 +154,8 @@
       return modelVal;
     }
 
-    function diff(original, current, shallow, removeStrategy) {
-      console.log('shallow:', shallow);
-      return getModified(original, current, removeStrategy || 'model', shallow);
+    function diff(original, current, deep, removeStrategy) {
+      return getModified(original, current, removeStrategy, !deep);
     }
 
     function getModified(original, copy, removeStrategy, shallow) {
@@ -170,7 +169,7 @@
         }
       };
       var removeHandler = removeStretegies[removeStrategy] || removeStretegies[null];
-      if (removeStrategy === 'model') removeStrategy = 'delete';
+      //if(removeStrategy === 'model') removeStrategy = 'delete';
 
       if (angular.equals(original, copy)) {
         return;

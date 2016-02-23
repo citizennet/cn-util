@@ -89,11 +89,16 @@ ngDescribe({
   name: 'diff',
   modules: 'cn.util',
   tests: function(cnUtil) {
-    it('should use `null` remove strategy on root level, and `delete` after', function() {
+    it('should use shallow diff and `null` remove strategy by default', function() {
       expect(cnUtil.diff(
           {foo: 1, bar: 2, baz: {doo: 3, far: 4, faz: {foo: 1, bar: 2}}},
-          {foo: 1, baz: {doo: 2, far: null, faz: {foo: 2, bar: null}}
-      })).toEqual({bar: null, baz: {doo: 2, faz: {foo: 2}}});
+          {foo: 1, baz: {doo: 2, far: null, faz: {foo: 2, bar: null}}}
+      )).toEqual({bar: null, baz: {doo: 2, far: null, faz: {foo: 2, bar: null}}});
+
+      expect(cnUtil.diff(
+          {foo: 1, bar: {boo: false}},
+          {foo: 2, bar: {boo: false, far: {a: undefined, b: undefined, c: undefined}}}
+      )).toEqual({foo: 2, bar: {boo: false, far: {a: undefined, b: undefined, c: undefined}}});
     });
   }
 })({
