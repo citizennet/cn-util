@@ -45,8 +45,8 @@
         function getModified(original, copy, removeStrategy, shallow) {
           //console.log('getModified:', removeStrategy, shallow);
           var removeStretegies = {
-            'delete': (obj, key) => {delete obj[key]},
-            'null': (obj, key) => {obj[key] = null}
+            'delete': (obj, key) => {delete obj[key];},
+            'null': (obj, key) => {obj[key] = null;}
           };
           var removeHandler = removeStretegies[removeStrategy] || removeStretegies[null];
           //if(removeStrategy === 'model') removeStrategy = 'delete';
