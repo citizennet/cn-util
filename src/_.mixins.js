@@ -8,23 +8,35 @@
    */
 
   _.mixin({
-    empty: empty,
-    add: add,
-    subtract: subtract,
-    multiply: multiply,
-    divide: divide,
-    round: round,
-    floor: floor,
-    ceil: ceil,
-    percentage: percentage,
+    allEqual,
+    empty,
+    add,
+    subtract,
+    multiply,
+    divide,
+    round,
+    floor,
+    ceil,
+    percentage,
 
     /* TODO: remove this, not needed and can achieve with lodash
      * Override lodash's range to allow high to low ranges
      */
-    range: range
+    range
   });
 
   ////////
+
+  function allEqual(vals) {
+    let first = _.first(vals);
+    if(_.isArray(first) && !_.isObject(_.first(first))) {
+      return _.allEqual(vals.map(v => JSON.stringify(v)));
+    }
+    if(_.isObject(first)) {
+      return _.all(vals, first);
+    }
+    return _.uniq(vals).length === 1;
+  }
 
   function empty(obj) {
     if(_.isArray(obj)) {

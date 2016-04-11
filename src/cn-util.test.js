@@ -1,4 +1,22 @@
 ngDescribe({
+  name: 'allEqual',
+  tests: function() {
+    it('should check if all array values are the same', function() {
+      expect(_.allEqual([1, 2, 1])).toEqual(false);
+      expect(_.allEqual([1, 1, 1])).toEqual(true);
+      expect(_.allEqual(["foo", "bar"])).toEqual(false);
+      expect(_.allEqual(["foo", "foo"])).toEqual(true);
+    });
+    it('should check if all collection values are the same', function() {
+      expect(_.allEqual([{foo: 1}, {foo: 2}, {foo: 1}])).toEqual(false);
+      expect(_.allEqual([{foo: 1, bar: 2}, {foo: 1, bar: 2}, {foo: 1, bar: 2}])).toEqual(true);
+      expect(_.allEqual([["foo"], ["bar"]])).toEqual(false);
+      expect(_.allEqual([["foo"], ["foo"]])).toEqual(true);
+      expect(_.allEqual([[{foo: "foo"}], [{foo: "bar"}]])).toEqual(false);
+      expect(_.allEqual([[{foo: "foo"}, {foo: "bar"}], [{foo: "foo"}, {foo: "bar"}]])).toEqual(true);
+    });
+  }
+})({
   name: 'cleanModel',
   modules: 'cn.util',
   tests: function(cnUtil) {
@@ -127,7 +145,7 @@ ngDescribe({
       ]
     };
     it('should have an html p tag at the beginning', function(){
-      dump(cnUtil.constructErrorMessageAsHtml(deliveryStatus.errors))
+      //dump(cnUtil.constructErrorMessageAsHtml(deliveryStatus.errors))
       expect(/^<p class="cn-error">/.test(cnUtil.constructErrorMessageAsHtml(deliveryStatus.errors))).toBe(true);
     });
     it('should have an html p tag at the end', function(){

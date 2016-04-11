@@ -10,6 +10,7 @@
    */
 
   _.mixin({
+    allEqual: allEqual,
     empty: empty,
     add: add,
     subtract: subtract,
@@ -27,6 +28,19 @@
   });
 
   ////////
+
+  function allEqual(vals) {
+    var first = _.first(vals);
+    if (_.isArray(first) && !_.isObject(_.first(first))) {
+      return _.allEqual(vals.map(function (v) {
+        return JSON.stringify(v);
+      }));
+    }
+    if (_.isObject(first)) {
+      return _.all(vals, first);
+    }
+    return _.uniq(vals).length === 1;
+  }
 
   function empty(obj) {
     if (_.isArray(obj)) {
