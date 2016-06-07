@@ -23,6 +23,7 @@ ngDescribe({
     it('should remove `null` keys from non-root level fields', function() {
       expect(cnUtil.cleanModel({
         foo: null,
+        foz: false,
         bar: [{foo: 1, bar: null}],
         baz: {
           doo: [{foo: 1, bar: null}, {foo: 1, bar: null}],
@@ -31,6 +32,7 @@ ngDescribe({
         }
       })).toEqual({
         foo: null,
+        foz: false,
         bar: [{foo: 1}],
         baz: {
           doo: [{foo: 1}, {foo: 1}],

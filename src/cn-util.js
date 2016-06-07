@@ -35,7 +35,7 @@
               else if(_.isObject(val)) cleanModelVal(val);
             });
           }
-          return modelVal;
+          //return modelVal;
         }
 
         function diff(original, current, deep, removeStrategy) {

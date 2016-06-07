@@ -165,7 +165,7 @@
           if (val === null || val === undefined) delete modelVal[key];else if (_.isArray(val)) val.forEach(cleanModelVal);else if (_.isObject(val)) cleanModelVal(val);
         });
       }
-      return modelVal;
+      //return modelVal;
     }
 
     function diff(original, current, deep, removeStrategy) {
