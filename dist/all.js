@@ -20,6 +20,9 @@
     floor: floor,
     ceil: ceil,
     percentage: percentage,
+    isFalsy: isFalsy,
+    /* deprecate if upgrading lodash to v4 */
+    nth: nth,
 
     /* TODO: remove this, not needed and can achieve with lodash
      * Override lodash's range to allow high to low ranges
@@ -28,6 +31,28 @@
   });
 
   ////////
+
+  function nth(array, n) {
+    if (array && array.length) {
+      var l = array.length;
+      n += n < 0 ? l : 0;
+      if (n > l) return array[n];
+    }
+  }
+
+  function isFalsy(x) {
+    if (!x) return true;
+    if (_.isObject(x)) {
+      if (_.isDate(x) || _.isRegExp(x)) return false;
+      if (_.isEmpty(x)) return true;
+      var falsy = true;
+      for (var k in x) {
+        if (!_.isFalsy(x[k])) falsy = false;
+      }
+      return falsy;
+    }
+    return false;
+  }
 
   function allEqual(vals) {
     var first = _.first(vals);
@@ -131,6 +156,8 @@
 })();
 'use strict';
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 (function () {
   'use strict';
   /**
@@ -138,15 +165,39 @@
    */
 
   angular.module('cn.util', []).factory('cnUtil', function () {
-    return {
+    var removeStretegies = {
+      'delete': function _delete(obj, key) {
+        delete obj[key];
+      },
+      'null': function _null(obj, key) {
+        obj[key] = null;
+      }
+    };
+
+    window.cnUtil = {
       cleanModel: cleanModel,
       cleanModelVal: cleanModelVal,
+      cleanEmptyJson: cleanEmptyJson,
       diff: diff,
       getModified: getModified,
       inheritCommon: inheritCommon,
       extend: extend,
       constructErrorMessageAsHtml: constructErrorMessageAsHtml,
-      constructPopoverHtml: constructPopoverHtml
+      constructPopoverHtml: constructPopoverHtml,
+      equals: equals
+    };
+
+    return {
+      cleanModel: cleanModel,
+      cleanModelVal: cleanModelVal,
+      cleanEmptyJson: cleanEmptyJson,
+      diff: diff,
+      getModified: getModified,
+      inheritCommon: inheritCommon,
+      extend: extend,
+      constructErrorMessageAsHtml: constructErrorMessageAsHtml,
+      constructPopoverHtml: constructPopoverHtml,
+      equals: equals
     };
 
     /////////
@@ -174,35 +225,100 @@
 
     function getModified(original, copy, removeStrategy, shallow) {
       //console.log('getModified:', removeStrategy, shallow);
-      var removeStretegies = {
-        'delete': function _delete(obj, key) {
-          delete obj[key];
-        },
-        'null': function _null(obj, key) {
-          obj[key] = null;
-        }
-      };
       var removeHandler = removeStretegies[removeStrategy] || removeStretegies[null];
-      //if(removeStrategy === 'model') removeStrategy = 'delete';
+      var eq = shallow ? equals : angular.equals;
 
-      if (angular.equals(original, copy)) {
-        return;
-      } else if (_.isArray(copy) || !_.isObject(copy)) {
-        return copy;
+      console.log('copy, original:', shallow, copy, original, eq(original, copy));
+      if (eq(original, copy)) return;
+      if (_.isObject(copy) && !_.isArray(copy)) {
+        var _ret = function () {
+          var modified = {};
+          _.each(copy, function (val, key) {
+            if (shallow) {
+              if (!eq(val, original[key])) {
+                modified[key] = cleanEmptyJson(val, original[key]);
+              }
+            } else {
+              var tmp = original[key] ? getModified(original[key], val, removeStrategy) : val;
+              if (tmp !== undefined && !eq(original[key], tmp)) modified[key] = tmp;
+            }
+          });
+          _.each(original, function (val, key) {
+            if (val && (copy[key] === null || copy[key] === undefined)) {
+              removeHandler(modified, key);
+            }
+          });
+          return {
+            v: _.isEmpty(modified) ? undefined : modified
+          };
+        }();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
       }
-      var modified = {};
-      _.each(copy, function (val, key) {
-        if (shallow) {
-          if (!angular.equals(val, original[key])) modified[key] = val;
-        } else {
-          var tmp = original[key] ? getModified(original[key], val, removeStrategy) : val;
-          if (tmp !== undefined && !angular.equals(original[key], tmp)) modified[key] = tmp;
+      return copy;
+    }
+
+    function cleanEmptyJson(copy, original) {
+      if (_.isArray(copy)) {
+        return _.map(copy, function (x, i) {
+          return cleanEmptyJson(x, original ? original[i] : undefined);
+        });
+      }
+      if (_.isObject(copy)) {
+        var ret = {},
+            k = undefined,
+            v = undefined,
+            a = undefined,
+            b = undefined;
+        for (k in copy) {
+          a = copy[k];
+          b = _.nth(original, k);
+          if (!_.isFalsy(a) || a === false && a !== b) {
+            v = cleanEmptyJson(a, b);
+            if (!_.isUndefined(v)) ret[k] = v;
+          }
         }
-      });
-      _.each(original, function (val, key) {
-        if (val && (copy[key] === null || copy[key] === undefined)) removeHandler(modified, key);
-      });
-      if (!_.isEmpty(modified)) return modified;
+        return _.isEmpty(ret) ? undefined : ret;
+      }
+      return copy;
+    }
+
+    /* Ripping off angular.equals but treating empty array and undefined/null as equal */
+    function equals(a, b) {
+      if (a === b || _.isFalsy(a) && _.isFalsy(b)) return true;
+      var ta = typeof a === 'undefined' ? 'undefined' : _typeof(a),
+          tb = typeof b === 'undefined' ? 'undefined' : _typeof(b),
+          l = undefined,
+          k = undefined,
+          ks = undefined;
+      if (ta === tb && ta === 'object') {
+        if (_.isArray(a)) {
+          if (!_.isArray(b)) return false;
+          if ((l = a.length) === b.length) {
+            for (k = 0; k < l; k++) {
+              if (!equals(a[k], b[k])) return false;
+            }
+            return true;
+          }
+        } else if (_.isDate(a)) {
+          return _.isDate(b) && equals(a.getTime(), b.getTime());
+        } else if (_.isRegExp(a)) {
+          return _.isRegExp(b) && a.toString() === b.toString();
+        } else {
+          if (_.isArray(b) || _.isDate(b) || _.isRegExp(b)) return false;
+          ks = Object.create(null);
+          for (k in a) {
+            if (k.charAt(0) === '$' || _.isFunction(a[k])) continue;
+            if (!equals(a[k], b[k])) return false;
+            if (!_.isFalsy(a[k])) ks[k] = true;
+          }
+          for (k in b) {
+            if (!(k in ks) && k.charAt(0) !== '$' && !_.isFalsy(b[k]) && !_.isFunction(b[k])) return false;
+          }
+          return true;
+        }
+      }
+      return false;
     }
 
     function inheritCommon(from, to) {

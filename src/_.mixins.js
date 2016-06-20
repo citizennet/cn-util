@@ -18,6 +18,9 @@
     floor,
     ceil,
     percentage,
+    isFalsy,
+    /* deprecate if upgrading lodash to v4 */
+    nth,
 
     /* TODO: remove this, not needed and can achieve with lodash
      * Override lodash's range to allow high to low ranges
@@ -26,6 +29,28 @@
   });
 
   ////////
+
+  function nth(array, n) {
+    if(array && array.length) {
+      let l = array.length;
+      n += n < 0 ? l : 0;
+      if(n > l) return array[n];
+    }
+  }
+
+  function isFalsy(x) {
+    if(!x) return true;
+    if(_.isObject(x)) {
+      if(_.isDate(x) || _.isRegExp(x)) return false;
+      if(_.isEmpty(x)) return true;
+      let falsy = true;
+      for(let k in x) {
+        if(!_.isFalsy(x[k])) falsy = false;
+      }
+      return falsy;
+    }
+    return false;
+  }
 
   function allEqual(vals) {
     let first = _.first(vals);

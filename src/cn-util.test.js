@@ -113,12 +113,50 @@ ngDescribe({
       expect(cnUtil.diff(
           {foo: 1, bar: 2, baz: {doo: 3, far: 4, faz: {foo: 1, bar: 2}}},
           {foo: 1, baz: {doo: 2, far: null, faz: {foo: 2, bar: null}}}
-      )).toEqual({bar: null, baz: {doo: 2, far: null, faz: {foo: 2, bar: null}}});
+      )).toEqual({bar: null, baz: {doo: 2, faz: {foo: 2}}});
 
       expect(cnUtil.diff(
           {foo: 1, bar: {boo: false}},
           {foo: 2, bar: {boo: false, far: {a: undefined, b: undefined, c: undefined}}}
-      )).toEqual({foo: 2, bar: {boo: false, far: {a: undefined, b: undefined, c: undefined}}});
+      )).toEqual({foo: 2});
+    });
+    it('should handle nested arrays/objects properly', function() {
+      expect(cnUtil.diff(
+          {foo: [1, 2, 3], bar: [{far: 1}, {far: 2}]},
+          {foo: [1, 2, 3], bar: [{far: 1, boo: []}, {far: 2}]}
+      )).toBeUndefined();
+
+      expect(cnUtil.diff(
+          {foo: [1, 2, 3], bar: [{far: 1}, {far: 2}]},
+          {foo: [1, 2], bar: [{far: 1, boo: []}, {far: 1}]}
+      )).toEqual({foo: [1, 2], bar: [{far: 1}, {far: 1}]});
+    });
+    it('should ignore empty arrays from previously undefined or null fields', function() {
+      expect(cnUtil.diff(
+          {foo: 1, bar: undefined, baz: null},
+          {foo: 1, bar: [1, 2], baz: [1, 2]}
+      )).toEqual({bar: [1, 2], baz: [1, 2]});
+
+      expect(cnUtil.diff(
+          {foo: 1, bar: undefined, baz: null, far: {foo: 1, bar: null}},
+          {foo: 2, bar: [], baz: [], far: {foo: 1}}
+      )).toEqual({foo: 2});
+    });
+    it('should recursively ignore empty fields', function() {
+      expect(cnUtil.diff(
+          {far: {foo: 1, bar: undefined, baz: null, boz: {}}, faz: 1},
+          {far: {foo: 1, bar: [1, 2], baz: [1, 2], boz: [1]}, faz: 1}
+      )).toEqual({far: {foo: 1, bar: [1, 2], baz: [1, 2], boz: [1]}});
+
+      expect(cnUtil.diff(
+          {far: {foo: 1, bar: undefined, baz: null, boz: {foo: []}}, faz: 1},
+          {far: {foo: 1, bar: [], baz: [], boz: {foo: {}}}, faz: 2}
+      )).toEqual({faz: 2});
+
+      expect(cnUtil.diff(
+          {far: {foo: 1, boz: {foo: {baz: []}}}, faz: 1},
+          {far: {foo: 1, boz: {foo: {baz: {}}}}, faz: 2}
+      )).toEqual({faz: 2});
     });
   }
 })({
