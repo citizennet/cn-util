@@ -228,7 +228,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var removeHandler = removeStretegies[removeStrategy] || removeStretegies[null];
       var eq = shallow ? equals : angular.equals;
 
-      console.log('copy, original:', shallow, copy, original, eq(original, copy));
+      // console.log('copy, original:', shallow, copy, original, eq(original, copy));
       if (eq(original, copy)) return;
       if (_.isObject(copy) && !_.isArray(copy)) {
         var _ret = function () {
