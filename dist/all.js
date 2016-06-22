@@ -291,7 +291,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           l = undefined,
           k = undefined,
           ks = undefined;
-      if (ta === tb && ta === 'object') {
+      if (ta === tb && ta === 'object' && _.isObject(a) && _.isObject(b)) {
         if (_.isArray(a)) {
           if (!_.isArray(b)) return false;
           if ((l = a.length) === b.length) {

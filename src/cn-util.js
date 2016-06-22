@@ -115,7 +115,7 @@
         function equals(a, b) {
           if(a === b || (_.isFalsy(a) && _.isFalsy(b))) return true;
           let ta = typeof a, tb = typeof b, l, k, ks;
-          if(ta === tb && ta === 'object') {
+          if(ta === tb && ta === 'object' && _.isObject(a) && _.isObject(b)) {
             if(_.isArray(a)) {
               if(!_.isArray(b)) return false;
               if((l = a.length) === b.length) {
