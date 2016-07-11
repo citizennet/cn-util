@@ -21,6 +21,7 @@
     ceil: ceil,
     percentage: percentage,
     isFalsy: isFalsy,
+    isTrulyEmpty: isTrulyEmpty,
     /* deprecate if upgrading lodash to v4 */
     nth: nth,
 
@@ -52,6 +53,10 @@
       return falsy;
     }
     return false;
+  }
+
+  function isTrulyEmpty(x) {
+    return x === undefined || _.isObject(x) && _.isEmpty(x);
   }
 
   function allEqual(vals) {
@@ -172,19 +177,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       'null': function _null(obj, key) {
         obj[key] = null;
       }
-    };
-
-    window.cnUtil = {
-      cleanModel: cleanModel,
-      cleanModelVal: cleanModelVal,
-      cleanEmptyJson: cleanEmptyJson,
-      diff: diff,
-      getModified: getModified,
-      inheritCommon: inheritCommon,
-      extend: extend,
-      constructErrorMessageAsHtml: constructErrorMessageAsHtml,
-      constructPopoverHtml: constructPopoverHtml,
-      equals: equals
     };
 
     return {

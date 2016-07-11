@@ -10,19 +10,6 @@
           'null': (obj, key) => {obj[key] = null;}
         };
 
-        window.cnUtil = {
-          cleanModel,
-          cleanModelVal,
-          cleanEmptyJson,
-          diff,
-          getModified,
-          inheritCommon,
-          extend,
-          constructErrorMessageAsHtml,
-          constructPopoverHtml,
-          equals
-        };
-
         return {
           cleanModel,
           cleanModelVal,

@@ -1,4 +1,19 @@
 ngDescribe({
+  name: 'isTrulyEmpty',
+  tests: function() {
+    it('should check if argument is empty', function() {
+      expect(_.isTrulyEmpty(undefined)).toEqual(true);
+      expect(_.isTrulyEmpty(null)).toEqual(false);
+      expect(_.isTrulyEmpty(false)).toEqual(false);
+      expect(_.isTrulyEmpty([])).toEqual(true);
+      expect(_.isTrulyEmpty({})).toEqual(true);
+      expect(_.isTrulyEmpty(123)).toEqual(false);
+      expect(_.isTrulyEmpty('abc')).toEqual(false);
+      expect(_.isTrulyEmpty([1,2,3])).toEqual(false);
+      expect(_.isTrulyEmpty({foo: 'bar'})).toEqual(false);
+    });
+  }
+})({
   name: 'allEqual',
   tests: function() {
     it('should check if all array values are the same', function() {
