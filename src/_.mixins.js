@@ -19,6 +19,7 @@
     ceil,
     percentage,
     isFalsy,
+    isTrulyEmpty,
     /* deprecate if upgrading lodash to v4 */
     nth,
 
@@ -50,6 +51,10 @@
       return falsy;
     }
     return false;
+  }
+
+  function isTrulyEmpty(x) {
+    return x === undefined || _.isObject(x) && _.isEmpty(x);
   }
 
   function allEqual(vals) {
