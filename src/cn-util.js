@@ -11,6 +11,8 @@
         };
 
         return {
+          buildParams,
+          buildSref,
           cleanModel,
           cleanModelVal,
           cleanEmptyJson,
@@ -24,6 +26,22 @@
         };
 
         /////////
+
+        function buildParams(...params) {
+          console.log('params:', params);
+          if(!params[0]) return '';
+          if(_.isArray(params[0])) params = params[0];
+
+          if(params.length > 1) {
+            params = params.reduceRight((prev, cur) => _.assign(prev, cur), {});
+          }
+          else params = params[0];
+          return _.isString(params) ? params : angular.toJson(params);
+        }
+
+        function buildSref(state, ...params) {
+          return `${state}(${buildParams(...params)})`;
+        }
 
         function cleanModel(model) {
           _.each(model, cleanModelVal);

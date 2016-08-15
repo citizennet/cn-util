@@ -1,4 +1,34 @@
 ngDescribe({
+  name: 'buildParams',
+  modules: 'cn.util',
+  tests: function(cnUtil) {
+    it('should assign params from right to left', function() {
+      var defParams = {foo: 2, bar: 3, baz: 4};
+      expect(angular.fromJson(cnUtil.buildParams({foo: 1, faz: 5}, defParams))).toEqual({
+        foo: 1,
+        bar: 3,
+        baz: 4,
+        faz: 5
+      });
+      expect(angular.fromJson(cnUtil.buildParams({foo: 1}, defParams, {faz: 6}))).toEqual({
+        foo: 1,
+        bar: 3,
+        baz: 4,
+        faz: 6
+      });
+      expect(defParams).toEqual({foo: 2, bar: 3, baz: 4});
+    });
+  }
+})({
+  name: 'buildSref',
+  modules: 'cn.util',
+  tests: function(cnUtil) {
+    it('should build sref given state name and params', function() {
+      expect(cnUtil.buildSref('foo', {bar: 1})).toEqual('foo({"bar":1})');
+      expect(cnUtil.buildSref('foo', '{"bar":1}')).toEqual('foo({"bar":1})');
+    });
+  }
+})({
   name: 'isTrulyEmpty',
   tests: function() {
     it('should check if argument is empty', function() {

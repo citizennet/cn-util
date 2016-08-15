@@ -180,6 +180,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     };
 
     return {
+      buildParams: buildParams,
+      buildSref: buildSref,
       cleanModel: cleanModel,
       cleanModelVal: cleanModelVal,
       cleanEmptyJson: cleanEmptyJson,
@@ -193,6 +195,31 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     };
 
     /////////
+
+    function buildParams() {
+      for (var _len = arguments.length, params = Array(_len), _key = 0; _key < _len; _key++) {
+        params[_key] = arguments[_key];
+      }
+
+      console.log('params:', params);
+      if (!params[0]) return '';
+      if (_.isArray(params[0])) params = params[0];
+
+      if (params.length > 1) {
+        params = params.reduceRight(function (prev, cur) {
+          return _.assign(prev, cur);
+        }, {});
+      } else params = params[0];
+      return _.isString(params) ? params : angular.toJson(params);
+    }
+
+    function buildSref(state) {
+      for (var _len2 = arguments.length, params = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        params[_key2 - 1] = arguments[_key2];
+      }
+
+      return state + '(' + buildParams.apply(undefined, params) + ')';
+    }
 
     function cleanModel(model) {
       _.each(model, cleanModelVal);
