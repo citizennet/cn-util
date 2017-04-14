@@ -161,7 +161,7 @@
 })();
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 (function () {
   'use strict';
@@ -201,7 +201,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         params[_key] = arguments[_key];
       }
 
-      console.log('params:', params);
       if (!params[0]) return '';
       if (_.isArray(params[0])) params = params[0];
 
@@ -235,7 +234,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           if (val === null || val === undefined) delete modelVal[key];else if (_.isArray(val)) val.forEach(cleanModelVal);else if (_.isObject(val)) cleanModelVal(val);
         });
       }
-      //return modelVal;
     }
 
     function diff(original, current, deep, removeStrategy) {
@@ -243,36 +241,28 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     function getModified(original, copy, removeStrategy, shallow) {
-      //console.log('getModified:', removeStrategy, shallow);
       var removeHandler = removeStretegies[removeStrategy] || removeStretegies[null];
       var eq = shallow ? equals : angular.equals;
 
-      // console.log('copy, original:', shallow, copy, original, eq(original, copy));
       if (eq(original, copy)) return;
       if (_.isObject(copy) && !_.isArray(copy)) {
-        var _ret = function () {
-          var modified = {};
-          _.each(copy, function (val, key) {
-            if (shallow) {
-              if (!eq(val, original[key])) {
-                modified[key] = cleanEmptyJson(val, original[key]);
-              }
-            } else {
-              var tmp = original[key] ? getModified(original[key], val, removeStrategy) : val;
-              if (tmp !== undefined && !eq(original[key], tmp)) modified[key] = tmp;
+        var modified = {};
+        _.each(copy, function (val, key) {
+          if (shallow) {
+            if (!eq(val, original[key])) {
+              modified[key] = cleanEmptyJson(val, original[key]);
             }
-          });
-          _.each(original, function (val, key) {
-            if (val && (copy[key] === null || copy[key] === undefined)) {
-              removeHandler(modified, key);
-            }
-          });
-          return {
-            v: _.isEmpty(modified) ? undefined : modified
-          };
-        }();
-
-        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+          } else {
+            var tmp = original[key] ? getModified(original[key], val, removeStrategy) : val;
+            if (tmp !== undefined && !eq(original[key], tmp)) modified[key] = tmp;
+          }
+        });
+        _.each(original, function (val, key) {
+          if (val && (copy[key] === null || copy[key] === undefined)) {
+            removeHandler(modified, key);
+          }
+        });
+        return _.isEmpty(modified) ? undefined : modified;
       }
       return copy;
     }
@@ -285,10 +275,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       }
       if (_.isObject(copy)) {
         var ret = {},
-            k = undefined,
-            v = undefined,
-            a = undefined,
-            b = undefined;
+            k = void 0,
+            v = void 0,
+            a = void 0,
+            b = void 0;
         for (k in copy) {
           a = copy[k];
           b = _.nth(original, k);
@@ -307,9 +297,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       if (a === b || _.isFalsy(a) && _.isFalsy(b)) return true;
       var ta = typeof a === 'undefined' ? 'undefined' : _typeof(a),
           tb = typeof b === 'undefined' ? 'undefined' : _typeof(b),
-          l = undefined,
-          k = undefined,
-          ks = undefined;
+          l = void 0,
+          k = void 0,
+          ks = void 0;
       if (ta === tb && ta === 'object' && _.isObject(a) && _.isObject(b)) {
         if (_.isArray(a)) {
           if (!_.isArray(b)) return false;
