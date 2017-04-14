@@ -28,7 +28,6 @@
         /////////
 
         function buildParams(...params) {
-          console.log('params:', params);
           if(!params[0]) return '';
           if(_.isArray(params[0])) params = params[0];
 
@@ -60,7 +59,6 @@
               else if(_.isObject(val)) cleanModelVal(val);
             });
           }
-          //return modelVal;
         }
 
         function diff(original, current, deep, removeStrategy) {
@@ -68,11 +66,9 @@
         }
 
         function getModified(original, copy, removeStrategy, shallow) {
-          //console.log('getModified:', removeStrategy, shallow);
           let removeHandler = removeStretegies[removeStrategy] || removeStretegies[null];
           let eq = shallow ? equals : angular.equals;
 
-          // console.log('copy, original:', shallow, copy, original, eq(original, copy));
           if(eq(original, copy)) return;
           if(_.isObject(copy) && !_.isArray(copy)) {
             let modified = {};
