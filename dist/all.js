@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 (function () {
   'use strict';
@@ -28,7 +28,8 @@
     /* TODO: remove this, not needed and can achieve with lodash
      * Override lodash's range to allow high to low ranges
      */
-    range: range
+    range: range,
+    titleCase: titleCase
   });
 
   ////////
@@ -157,6 +158,12 @@
       start += dir;
     }
     return result;
+  }
+
+  function titleCase(str) {
+    return _.flow(_.words, _.partial(_.map, _, _.capitalize), function (w) {
+      return w.join(" ");
+    })(str);
   }
 })();
 'use strict';
