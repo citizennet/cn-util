@@ -26,7 +26,8 @@
     /* TODO: remove this, not needed and can achieve with lodash
      * Override lodash's range to allow high to low ranges
      */
-    range
+    range,
+    titleCase
   });
 
   ////////
@@ -154,6 +155,14 @@
       start += dir;
     }
     return result;
+  }
+
+  function titleCase(str) {
+    return _.flow(
+      _.words,
+      _.partial(_.map, _, _.capitalize),
+      w => w.join(" ")
+    )(str);
   }
 
 })();
