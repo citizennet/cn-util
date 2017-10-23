@@ -45,17 +45,17 @@
     if(_.isObject(x)) {
       if(_.isDate(x) || _.isRegExp(x)) return false;
       if(_.isEmpty(x)) return true;
-      let falsy = true;
-      for(let k in x) {
-        if(!_.isFalsy(x[k])) falsy = false;
-      }
-      return falsy;
+      return _.every(x, _.isFalsy);
     }
     return false;
   }
 
-  function isTrulyEmpty(x) {
-    return x === undefined || _.isObject(x) && _.isEmpty(x);
+  function isTrulyEmpty(x, ...emptyVals) {
+    return (
+      x === undefined ||
+      _.some(emptyVals, v => x === v) ||
+      _.isObject(x) && !x.length && _.every(x, y => _.isTrulyEmpty(y, ...emptyVals))
+    );
   }
 
   function allEqual(vals) {
