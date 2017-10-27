@@ -79,7 +79,9 @@
                 }
               }
               else {
-                let tmp = original[key] ? getModified(original[key], val, removeStrategy) : val;
+                let tmp = original[key] ?
+                    getModified(original[key], val, removeStrategy) :
+                    val;
                 if(tmp !== undefined && !eq(original[key], tmp)) modified[key] = tmp;
               }
             });
@@ -95,14 +97,17 @@
 
         function cleanEmptyJson(copy, original) {
           if(_.isArray(copy)) {
-            return _.map(copy, (x, i) => cleanEmptyJson(x, original ? original[i] : undefined));
+            return _.map(
+              copy,
+              (x, i) => cleanEmptyJson(x, original ? original[i] : undefined)
+            );
           }
           if(_.isObject(copy)) {
             let ret = {}, k, v, a, b;
             for(k in copy) {
               a = copy[k];
-              b = _.nth(original, k);
-              if(!_.isFalsy(a) || (a === false && a !== b)) {
+              b = _.get(original, k);
+              if(!_.isTrulyEmpty(a, null)) {
                 v = cleanEmptyJson(a, b);
                 if(!_.isUndefined(v)) ret[k] = v;
               }
@@ -112,9 +117,20 @@
           return copy;
         }
 
+        function undefinedAndFalsy(a, b) {
+          return (
+            (a === undefined || b === undefined) &&
+            (a === false || a === 0 || b === false || b === 0)
+          );
+        }
+
         /* Ripping off angular.equals but treating empty array and undefined/null as equal */
         function equals(a, b) {
-          if(a === b || (_.isFalsy(a) && _.isFalsy(b))) return true;
+          if(a === b ||
+             (_.isTrulyEmpty(a, null) &&
+              _.isTrulyEmpty(b, null) &&
+              !undefinedAndFalsy(a, b))
+            ) return true;
           let ta = typeof a, tb = typeof b, l, k, ks;
           if(ta === tb && ta === 'object' && _.isObject(a) && _.isObject(b)) {
             if(_.isArray(a)) {
@@ -138,12 +154,12 @@
               for(k in a) {
                 if(k.charAt(0) === '$' || _.isFunction(a[k])) continue;
                 if(!equals(a[k], b[k])) return false;
-                if(!_.isFalsy(a[k])) ks[k] = true;
+                if(!_.isTrulyEmpty(a[k], null)) ks[k] = true;
               }
               for(k in b) {
                 if(!(k in ks) &&
                     k.charAt(0) !== '$' &&
-                    !_.isFalsy(b[k]) &&
+                    !_.isTrulyEmpty(b[k], null) &&
                     !_.isFunction(b[k])) return false;
               }
               return true;

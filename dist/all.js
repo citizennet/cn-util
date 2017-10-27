@@ -47,17 +47,23 @@
     if (_.isObject(x)) {
       if (_.isDate(x) || _.isRegExp(x)) return false;
       if (_.isEmpty(x)) return true;
-      var falsy = true;
-      for (var k in x) {
-        if (!_.isFalsy(x[k])) falsy = false;
-      }
-      return falsy;
+      return _.every(x, _.isFalsy);
     }
     return false;
   }
 
   function isTrulyEmpty(x) {
-    return x === undefined || _.isObject(x) && _.isEmpty(x);
+    for (var _len = arguments.length, emptyVals = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      emptyVals[_key - 1] = arguments[_key];
+    }
+
+    return x === undefined || _.some(emptyVals, function (v) {
+      return x === v;
+    }) || _.isObject(x) && !x.length && _.every(x, function (y) {
+      var _ref;
+
+      return (_ref = _).isTrulyEmpty.apply(_ref, [y].concat(emptyVals));
+    });
   }
 
   function allEqual(vals) {
@@ -288,8 +294,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             b = void 0;
         for (k in copy) {
           a = copy[k];
-          b = _.nth(original, k);
-          if (!_.isFalsy(a) || a === false && a !== b) {
+          b = _.get(original, k);
+          if (!_.isTrulyEmpty(a, null)) {
             v = cleanEmptyJson(a, b);
             if (!_.isUndefined(v)) ret[k] = v;
           }
@@ -299,9 +305,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return copy;
     }
 
+    function undefinedAndFalsy(a, b) {
+      return (a === undefined || b === undefined) && (a === false || a === 0 || b === false || b === 0);
+    }
+
     /* Ripping off angular.equals but treating empty array and undefined/null as equal */
     function equals(a, b) {
-      if (a === b || _.isFalsy(a) && _.isFalsy(b)) return true;
+      if (a === b || _.isTrulyEmpty(a, null) && _.isTrulyEmpty(b, null) && !undefinedAndFalsy(a, b)) return true;
       var ta = typeof a === 'undefined' ? 'undefined' : _typeof(a),
           tb = typeof b === 'undefined' ? 'undefined' : _typeof(b),
           l = void 0,
@@ -326,10 +336,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           for (k in a) {
             if (k.charAt(0) === '$' || _.isFunction(a[k])) continue;
             if (!equals(a[k], b[k])) return false;
-            if (!_.isFalsy(a[k])) ks[k] = true;
+            if (!_.isTrulyEmpty(a[k], null)) ks[k] = true;
           }
           for (k in b) {
-            if (!(k in ks) && k.charAt(0) !== '$' && !_.isFalsy(b[k]) && !_.isFunction(b[k])) return false;
+            if (!(k in ks) && k.charAt(0) !== '$' && !_.isTrulyEmpty(b[k], null) && !_.isFunction(b[k])) return false;
           }
           return true;
         }
