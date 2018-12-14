@@ -74,7 +74,7 @@
       }));
     }
     if (_.isObject(first)) {
-      return _.all(vals, first);
+      return _.every(vals, _.matches(first));
     }
     return _.uniq(vals).length === 1;
   }
