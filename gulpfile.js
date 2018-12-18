@@ -28,7 +28,7 @@ gulp.task('test', function() {
   // NOTE: Using the fake './foobar' so as to run the files
   // listed in karma.conf.js INSTEAD of what was passed to
   // gulp.src !
-  return gulp.src('./foobar')
+  return gulp.src('./foobar', { allowEmpty: true })
       .pipe(karma({
         configFile: 'karma.conf.js',
         action: 'run'
@@ -55,11 +55,11 @@ gulp.task('scripts', function() {
 
 // Watch Files For Changes
 gulp.task('watch', function() {
-  gulp.watch('src/*.js', ['lint', 'scripts']);
+  gulp.watch('src/*.js', gulp.series('lint', 'scripts'));
 });
 
 // Default Task sans watch
-gulp.task('build', ['lint', 'scripts', 'test']);
+gulp.task('build', gulp.series('lint', 'scripts', 'test'));
 
 // Default Task
-gulp.task('default', ['build', 'watch']);
+gulp.task('default', gulp.series('build', 'watch'));
