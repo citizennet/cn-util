@@ -58,16 +58,32 @@
     );
   }
 
-  function allEqual(vals) {
+  function allEqual(vals, excludes) {
     let first = _.first(vals);
     if(_.isArray(first) && !_.isObject(_.first(first))) {
       return _.allEqual(vals.map(v => JSON.stringify(v)));
     }
     if(_.isObject(first)) {
-      return _.every(vals, _.matches(first));
+      if (!_.isArray(first)) {
+        return _.every(vals, _.matches(first));
+      } else {
+        return arrayDeepEqual(vals, first, _.isArray(excludes) ? excludes : []);
+      }
     }
     return _.uniq(vals).length === 1;
   }
+
+  function arrayDeepEqual(vals, val, excludes) {
+    const lengthCheck = vals.map(v => v.length).every(l => l === val.length);
+    if (!lengthCheck) return false;
+    let result = true;
+    for (let i = 0; i < val.length; i++) {
+      const clonedVal = Object.assign({}, _.omit(val[i], excludes));
+      const clonedVals = vals.map(val => val[i]);
+      result = result && _.all(clonedVals, clonedVal);
+    }    
+    return result;
+  };
 
   function empty(obj) {
     if(_.isArray(obj)) {
