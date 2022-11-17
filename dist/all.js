@@ -66,7 +66,7 @@
     });
   }
 
-  function allEqual(vals) {
+  function allEqual(vals, excludes) {
     var first = _.first(vals);
     if (_.isArray(first) && !_.isObject(_.first(first))) {
       return _.allEqual(vals.map(function (v) {
@@ -74,10 +74,37 @@
       }));
     }
     if (_.isObject(first)) {
-      return _.every(vals, _.matches(first));
+      if (!_.isArray(first)) {
+        return _.every(vals, _.matches(first));
+      } else {
+        return arrayDeepEqual(vals, first, _.isArray(excludes) ? excludes : []);
+      }
     }
     return _.uniq(vals).length === 1;
   }
+
+  function arrayDeepEqual(vals, val, excludes) {
+    var lengthCheck = vals.map(function (v) {
+      return v.length;
+    }).every(function (l) {
+      return l === val.length;
+    });
+    if (!lengthCheck) return false;
+    var result = true;
+
+    var _loop = function _loop(i) {
+      var clonedVal = Object.assign({}, _.omit(val[i], excludes));
+      var clonedVals = vals.map(function (val) {
+        return val[i];
+      });
+      result = result && _.all(clonedVals, clonedVal);
+    };
+
+    for (var i = 0; i < val.length; i++) {
+      _loop(i);
+    }
+    return result;
+  };
 
   function empty(obj) {
     if (_.isArray(obj)) {
