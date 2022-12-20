@@ -236,4 +236,17 @@
           return objectsArray;
         }
       });
+
+  angular.module('cn.util')
+  .directive('cnIgnoreWheel', function () {
+    return {
+      restrict: 'A',
+      link: function (scope, element) {
+        element.bind('mousewheel', function() {
+          element[0].blur();
+        });
+      }
+    };
+  });
+  
 })();
