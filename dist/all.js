@@ -414,4 +414,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return objectsArray;
     }
   });
+
+  angular.module('cn.util').directive('cnIgnoreWheel', function () {
+    return {
+      restrict: 'A',
+      link: function link(scope, element) {
+        element.bind('mousewheel', function () {
+          element[0].blur();
+        });
+      }
+    };
+  });
 })();
