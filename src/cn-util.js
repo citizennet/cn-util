@@ -245,6 +245,8 @@
          * @returns localTime: string
          */
         function convertToLocalTime(ptTime, userTimezone) {
+          if (!ptTime) return;
+          
           if (!moment(ptTime, 'YYYY-MM-DD HH:mm:ss').isValid()) {
             throw `Invalid datetime string detected: ${ptTime}`;
           }
