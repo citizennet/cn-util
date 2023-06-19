@@ -22,7 +22,8 @@
           extend,
           constructErrorMessageAsHtml,
           constructPopoverHtml,
-          equals
+          equals,
+          convertToLocalTime,
         };
 
         /////////
@@ -234,6 +235,31 @@
             object.popoverHtml = '<p class="popover-text">Name: ' + object[nameKey] + '</p>' + '<p class="popover-text">ID: ' + object[idKey] + '</p>';
           });
           return objectsArray;
+        }
+
+        /**
+         * convert given datetime string to local time from PT time
+         *
+         * @param ptTime: string
+         * @param userTimezone: string;
+         * @returns localTime: string
+         */
+        function convertToLocalTime(ptTime, userTimezone) {
+          if (!moment(ptTime, 'YYYY-MM-DD HH:mm:ss').isValid()) {
+            throw `Invalid datetime string detected: ${ptTime}`;
+          }
+
+          let dateInPT;
+          let localTime;
+          
+          if (userTimezone) {
+            dateInPT = moment.tz(ptTime, "YYYY-MM-DD HH:mm:ss", "America/Los_Angeles");
+            localTime = dateInPT.tz(userTimezone).format('YYYY-MM-DD HH:mm:ss');
+            return localTime;
+          }
+          dateInPT = new Date(ptTime + " UTC-8");
+          localTime = dateInPT.toLocaleString();
+          return localTime;
         }
       });
 })();
