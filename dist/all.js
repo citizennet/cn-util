@@ -182,7 +182,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
    * Definition for the cn.model module
    */
 
-  angular.module('cn.util', []).factory('cnUtil', function () {
+  angular.module('cn.util', []).factory('cnUtil', ['$rootScope', 'cnSession', 'EVENTS', function ($rootScope, cnSession, EVENTS) {
     var removeStretegies = {
       'delete': function _delete(obj, key) {
         delete obj[key];
@@ -191,6 +191,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         obj[key] = null;
       }
     };
+
+    var user = cnSession.getUser();
 
     return {
       buildParams: buildParams,
@@ -205,7 +207,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       constructErrorMessageAsHtml: constructErrorMessageAsHtml,
       constructPopoverHtml: constructPopoverHtml,
       equals: equals,
-      convertToLocalTime: convertToLocalTime
+      convertToLocalTime: convertToLocalTime,
+      convertToPtTime: convertToPtTime
     };
 
     /////////
@@ -419,10 +422,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
      * convert given datetime string to local time from PT time
      *
      * @param ptTime: string
-     * @param userTimezone: string;
      * @returns localTime: string
      */
-    function convertToLocalTime(ptTime, userTimezone) {
+    function convertToLocalTime(ptTime) {
       if (!ptTime) return;
 
       if (!moment(ptTime, 'YYYY-MM-DD HH:mm:ss').isValid()) {
@@ -432,14 +434,47 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var dateInPT = void 0;
       var localTime = void 0;
 
-      if (userTimezone) {
+      if (user.timezone) {
         dateInPT = moment.tz(ptTime, "YYYY-MM-DD HH:mm:ss", "America/Los_Angeles");
-        localTime = dateInPT.tz(userTimezone).format('YYYY-MM-DD HH:mm:ss');
+        localTime = dateInPT.tz(user.timezone).format('YYYY-MM-DD HH:mm:ss');
         return localTime;
       }
       dateInPT = new Date(ptTime + " UTC-8");
       localTime = dateInPT.toLocaleString();
+
       return localTime;
     }
-  });
+
+    /**
+     * modified start and end time in the model
+     * @param campaign: vm.model
+     * @returns campaign: vm.model
+     */
+    function convertToPtTime(campaign) {
+      try {
+        if (campaign.startDate && campaign.stopDate) {
+          campaign.startDate = convertToPtTimeString(campaign.startDate);
+          campaign.stopDate = convertToPtTimeString(campaign.stopDate);
+        } else if (campaign.startTime && campaign.endTime) {
+          campaign.startTime = convertToPtTimeString(campaign.startTime);
+          campaign.endTime = convertToPtTimeString(campaign.endTime);
+        }
+        return campaign;
+      } catch (error) {
+        $rootScope.$broadcast(EVENTS.notify, error);
+      }
+    }
+
+    /**
+     * @param localTime: string
+     * @returns ptTime: string
+     */
+    function convertToPtTimeString(localTime) {
+      if (!localTime || !moment(localTime, 'YYYY-MM-DD HH:mm:ss').isValid()) {
+        throw 'Invalid datetime string detected: ' + localTime;
+      }
+      var dateInLocal = moment.tz(localTime, "YYYY-MM-DD HH:mm:ss", user.timezone);
+      return dateInLocal.tz("America/Los_Angeles").format('YYYY-MM-DD HH:mm:ss');
+    }
+  }]);
 })();
