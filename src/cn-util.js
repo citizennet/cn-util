@@ -4,11 +4,13 @@
    * Definition for the cn.model module
    */
   angular.module('cn.util', [])
-      .factory('cnUtil', function() {
+      .factory('cnUtil', ['$rootScope', 'cnSession', 'EVENTS', function($rootScope, cnSession, EVENTS) {
         let removeStretegies = {
           'delete': (obj, key) => {delete obj[key];},
           'null': (obj, key) => {obj[key] = null;}
         };
+
+        let user = cnSession.getUser();
 
         return {
           buildParams,
@@ -22,7 +24,9 @@
           extend,
           constructErrorMessageAsHtml,
           constructPopoverHtml,
-          equals
+          equals,
+          convertToLocalTime,
+          convertToPtTime,
         };
 
         /////////
@@ -235,5 +239,64 @@
           });
           return objectsArray;
         }
-      });
+
+        /**
+         * convert given datetime string to local time from PT time
+         *
+         * @param ptTime: string
+         * @returns localTime: string
+         */
+        function convertToLocalTime(ptTime) {
+          if (!ptTime) return;
+          
+          if (!moment(ptTime, 'YYYY-MM-DD HH:mm:ss').isValid()) {
+            throw `Invalid datetime string detected: ${ptTime}`;
+          }
+
+          let dateInPT;
+          let localTime;
+          
+          if (user.timezone) {
+            dateInPT = moment.tz(ptTime, "YYYY-MM-DD HH:mm:ss", "America/Los_Angeles");
+            localTime = dateInPT.tz(user.timezone).format('YYYY-MM-DD HH:mm:ss');
+            return localTime;
+          }
+          dateInPT = new Date(ptTime + " UTC-8");
+          localTime = dateInPT.toLocaleString();
+
+          return localTime;
+        }
+
+        /**
+         * modified start and end time in the model
+         * @param campaign: vm.model
+         * @returns campaign: vm.model
+         */
+        function convertToPtTime(campaign) {
+          try {
+            if(campaign.startDate && campaign.stopDate) {
+              campaign.startDate = convertToPtTimeString(campaign.startDate);
+              campaign.stopDate = convertToPtTimeString(campaign.stopDate);
+            } else if(campaign.startTime && campaign.endTime) {
+              campaign.startTime = convertToPtTimeString(campaign.startTime);
+              campaign.endTime = convertToPtTimeString(campaign.endTime);
+            }
+            return campaign;
+          } catch (error) {
+            $rootScope.$broadcast(EVENTS.notify, error);
+          }
+        }
+
+        /**
+         * @param localTime: string
+         * @returns ptTime: string
+         */
+        function convertToPtTimeString (localTime) {
+          if (!localTime || !moment(localTime, 'YYYY-MM-DD HH:mm:ss').isValid()) {
+            throw `Invalid datetime string detected: ${localTime}`;
+          }
+          const dateInLocal = moment.tz(localTime , "YYYY-MM-DD HH:mm:ss", user.timezone);
+          return dateInLocal.tz("America/Los_Angeles").format('YYYY-MM-DD HH:mm:ss');
+        }
+      }]);
 })();
