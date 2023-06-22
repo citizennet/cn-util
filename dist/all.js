@@ -208,7 +208,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       constructPopoverHtml: constructPopoverHtml,
       equals: equals,
       convertToLocalTime: convertToLocalTime,
-      convertToPtTime: convertToPtTime
+      convertToPtTime: convertToPtTime,
+      filterObjectByKeys: filterObjectByKeys
     };
 
     /////////
@@ -475,6 +476,21 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       }
       var dateInLocal = moment.tz(localTime, "YYYY-MM-DD HH:mm:ss", user.timezone);
       return dateInLocal.tz("America/Los_Angeles").format('YYYY-MM-DD HH:mm:ss');
+    }
+
+    /**
+     * @param {Array} keysToRemove string keys being removed
+     * @param {Object} obj object to filter
+     * @returns {Object} filtered object
+     */
+    function filterObjectByKeys(obj, keysToRemove) {
+      if (!_.isObject(obj)) return {};
+      return Object.keys(obj).filter(function (key) {
+        return !keysToRemove.includes(key);
+      }).reduce(function (result, key) {
+        result[key] = obj[key];
+        return result;
+      }, {});
     }
   }]);
 })();
