@@ -27,6 +27,7 @@
           equals,
           convertToLocalTime,
           convertToPtTime,
+          filterObjectByKeys,
         };
 
         /////////
@@ -297,6 +298,19 @@
           }
           const dateInLocal = moment.tz(localTime , "YYYY-MM-DD HH:mm:ss", user.timezone);
           return dateInLocal.tz("America/Los_Angeles").format('YYYY-MM-DD HH:mm:ss');
+        }
+
+        /**
+         * @param {Array} keysToRemove string keys being removed
+         * @param {Object} obj object to filter
+         * @returns {Object} filtered object
+         */
+        function filterObjectByKeys(obj, keysToRemove) {
+          if(!_.isObject(obj)) return {}
+          return Object.keys(obj).filter(key => !keysToRemove.includes(key)).reduce((result, key) => {
+            result[key] = obj[key];
+            return result;
+          }, {});
         }
       }]);
 })();
