@@ -27,7 +27,7 @@
           equals,
           convertToLocalTime,
           convertToPtTime,
-          filterObjectByKeys,
+          processDateTime,
         };
 
         /////////
@@ -67,7 +67,10 @@
         }
 
         function diff(original, current, deep, removeStrategy) {
-          return getModified(original, current, removeStrategy, !deep);
+          const modified = getModified(original, current, removeStrategy, !deep);
+          // mutate modified
+          processDateTime(modified, original);
+          return modified;
         }
 
         function getModified(original, copy, removeStrategy, shallow) {
@@ -300,17 +303,23 @@
           return dateInLocal.tz("America/Los_Angeles").format('YYYY-MM-DD HH:mm:ss');
         }
 
-        /**
-         * @param {Array} keysToRemove string keys being removed
-         * @param {Object} obj object to filter
-         * @returns {Object} filtered object
-         */
-        function filterObjectByKeys(obj, keysToRemove) {
-          if(!_.isObject(obj)) return {}
-          return Object.keys(obj).filter(key => !keysToRemove.includes(key)).reduce((result, key) => {
-            result[key] = obj[key];
-            return result;
-          }, {});
+        function processDateTime(modified, original) {
+          const datetimeKeys = ['startDate', 'stopDate', 'startTime', 'endTime'];
+  
+          for (let key in modified) {
+            // if (typeof modified[key] === 'object' && modified[key] !== null) {
+            //   processDateTime(modified[key], original[key]);
+            // }
+            
+            if (datetimeKeys.includes(key)) {
+              const ptTime = convertToPtTimeString(modified[key]);
+              const originalPtTime = original[key];
+              if (ptTime === originalPtTime) {
+                console.log("datetime not changed");
+                delete modified[key];
+              }
+            }
+          }
         }
       }]);
 })();
