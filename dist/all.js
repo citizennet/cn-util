@@ -209,7 +209,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       equals: equals,
       convertToLocalTime: convertToLocalTime,
       convertToPtTime: convertToPtTime,
-      filterObjectByKeys: filterObjectByKeys
+      processDateTime: processDateTime
     };
 
     /////////
@@ -255,7 +255,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     function diff(original, current, deep, removeStrategy) {
-      return getModified(original, current, removeStrategy, !deep);
+      var modified = getModified(original, current, removeStrategy, !deep);
+      // mutate modified
+      processDateTime(modified, original);
+      return modified;
     }
 
     function getModified(original, copy, removeStrategy, shallow) {
@@ -478,19 +481,23 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return dateInLocal.tz("America/Los_Angeles").format('YYYY-MM-DD HH:mm:ss');
     }
 
-    /**
-     * @param {Array} keysToRemove string keys being removed
-     * @param {Object} obj object to filter
-     * @returns {Object} filtered object
-     */
-    function filterObjectByKeys(obj, keysToRemove) {
-      if (!_.isObject(obj)) return {};
-      return Object.keys(obj).filter(function (key) {
-        return !keysToRemove.includes(key);
-      }).reduce(function (result, key) {
-        result[key] = obj[key];
-        return result;
-      }, {});
+    function processDateTime(modified, original) {
+      var datetimeKeys = ['startDate', 'stopDate', 'startTime', 'endTime'];
+
+      for (var key in modified) {
+        // if (typeof modified[key] === 'object' && modified[key] !== null) {
+        //   processDateTime(modified[key], original[key]);
+        // }
+
+        if (datetimeKeys.includes(key)) {
+          var ptTime = convertToPtTimeString(modified[key]);
+          var originalPtTime = original[key];
+          if (ptTime === originalPtTime) {
+            console.log("datetime not changed");
+            delete modified[key];
+          }
+        }
+      }
     }
   }]);
 })();
